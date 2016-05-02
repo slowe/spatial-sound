@@ -104,14 +104,13 @@
 		console.log('orientation',event);
 		// BLAH
 		if(this.playing){
-			var a = Math.PI*event.alpha/180;
-			var b = Math.PI*event.beta/180;
-			var g = Math.PI*event.beta/180;
-			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
+//			var a = Math.PI*event.alpha/180;
+//			var b = Math.PI*event.beta/180;
+//			var g = Math.PI*event.beta/180;
+//			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
 
-			this.angle(theta);
-//			S("#magnetometer").html("Magnetometer: " + event.alpha + ", " + event.beta + ", " + event.gamma + ", " + theta*180/Math.PI);
-			S("#magnetometer").html("Magnetometer: " + (theta*180/Math.PI));
+			//S("#magnetometer").html("Magnetometer: " + event.alpha.toFixed(3) + ", " + event.beta.toFixed(3) + ", " + event.gamma.toFixed(3) + ", " + theta*180/Math.PI);
+//			S("#magnetometer").html("Magnetometer: " + (theta*180/Math.PI));
 		}
 		return this;
 	}
@@ -188,6 +187,8 @@
 	}
 	ThreeDSound.prototype.setTime = function(t){
 		for(var i = 0; i < this.sounds.length; i++) this.sounds[i].setTime(t);
+		theta = 360*t/10;
+		this.angle(theta);
 	}
 
 	function SoundSource(src,ctx,el,path){
