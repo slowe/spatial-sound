@@ -59,7 +59,7 @@
 		this.yvel = 0;
 		this.zvel = 0;
 
-		this.sounds = new Array();
+		this.sounds = new Array();/*
 		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data'),[
 			{x:this.x,y:this.y-1,z:this.z,t:0},
 			{x:this.x,y:this.y-1,z:this.z,t:5},
@@ -71,7 +71,15 @@
 			{x:this.x-20,y:this.y-1,z:this.z,t:0},
 			{x:this.x+20,y:this.y-1,z:this.z,t:10}
 		]));
-
+		*/
+		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data'),[
+			{x:this.x,y:this.y-1,z:this.z,t:0},
+			{x:this.x,y:this.y-1,z:this.z,t:5}
+		]));
+//		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data2'),[
+//			{x:this.x,y:this.y-1,z:this.z,t:0},
+//			{x:this.x,y:this.y-1,z:this.z,t:5}
+//		]));
 
 		var listener = this.audioCtx.listener;
 		listener.dopplerFactor = 1;
@@ -101,13 +109,12 @@
 			var b = Math.PI*event.beta/180;
 			var g = Math.PI*event.beta/180;
 			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
-			
+			var phi = 0;
+
+			listener.setOrientation(Math.cos(theta),Math.sin(theta),Math.sin(phi),0,0,1);
 			S("#magnetometer").html("Magnetometer: " + event.alpha + ", " + event.beta + ", " + event.gamma + ", " + theta*180/Math.PI);
 //			if(!this.theta_i) this.theta_i = this.theta;
 //			if(!this.phi_i) this.phi_i = phi.theta;
-//			x = Math.cos(this.theta - this.theta_i);
-//			y = Math.sin(this.theta - this.theta_i);
-//			z = Math.cos
 		}
 		return this;
 	}
