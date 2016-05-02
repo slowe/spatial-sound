@@ -25,6 +25,7 @@
 				+ (event.accelerationIncludingGravity.z/9.81).toFixed(4));
 		}
 
+		space = new ThreeDSound();
 
 		if(window.DeviceMotionEvent){
 			window.addEventListener("devicemotion", motion, false);
@@ -34,7 +35,6 @@
 			window.addEventListener("deviceorientation", orientation, false);
 			S('#status').html(S('#status').html().replace("is not supported", "is supported"));
 		}
-		space = new ThreeDSound();
 	});
 
 	function ThreeDSound(){
