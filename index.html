@@ -18,7 +18,6 @@
 			space.orientation(event);
 		}
 		function motion(event){
-			console.log('motion',event)
 			S("#accelerometer").html("Accelerometer: "
 				+ (event.accelerationIncludingGravity.x/9.81).toFixed(4) + ", "
 				+ (event.accelerationIncludingGravity.y/9.81).toFixed(4) + ", "
@@ -78,8 +77,6 @@
 		]));
 
 		this.listener = this.audioCtx.listener;
-		this.listener.dopplerFactor = 1;
-		this.listener.speedOfSound = 343.3;
 		this.listener.setOrientation(0,0,-1,0,1,0);
 		// Note that the above three features have been deprecated
 		// in recent versions of the spec (mid April 2015 onwards)
@@ -101,16 +98,18 @@
 		if(this.listener) this.listener.setOrientation(Math.cos(theta*Math.PI/180),0,Math.sin(theta*Math.PI/180),0,-1,0);
 	}
 	ThreeDSound.prototype.orientation = function(event){
-		console.log('orientation',event);
+		//console.log('orientation',event);
 		// BLAH
+		if(!event.alpha) event.alpha = 0;
 		if(this.playing){
-//			var a = Math.PI*event.alpha/180;
-//			var b = Math.PI*event.beta/180;
-//			var g = Math.PI*event.beta/180;
-//			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
-
-			//S("#magnetometer").html("Magnetometer: " + event.alpha.toFixed(3) + ", " + event.beta.toFixed(3) + ", " + event.gamma.toFixed(3) + ", " + theta*180/Math.PI);
-			S("#magnetometer").html("Magnetometer angle: " + (theta*180/Math.PI));
+			var a = Math.PI*event.alpha/180;
+			var b = Math.PI*event.beta/180;
+			var g = Math.PI*event.beta/180;
+			if(!a) a = 0;
+		console.log(a,b,g)
+			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
+			S("#magnetometer").html("Magnetometer: " + a.toFixed(3) + ", " + b.toFixed(3) + ", " + g.toFixed(3) + ", " + theta*180/Math.PI);
+			this.angle(theta*180/Math.PI);
 		}
 		return this;
 	}
