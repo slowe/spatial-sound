@@ -100,7 +100,7 @@
 			var g = Math.PI*event.beta/180;
 			theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
 			
-			S("#magnetometer").html("Magnetometer: " + event.alpha.toFixed(2) + ", " + event.beta.toFixed(2) + ", " + event.gamma.toFixed(2)+', '+theta.toFixed(2));
+			S("#magnetometer").html("Magnetometer: " + event.alpha + ", " + event.beta + ", " + event.gamma + ", " + theta*180/Math.PI);
 //			if(!this.theta_i) this.theta_i = this.theta;
 //			if(!this.phi_i) this.phi_i = phi.theta;
 //			x = Math.cos(this.theta - this.theta_i);
