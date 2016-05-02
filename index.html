@@ -105,7 +105,7 @@
 			var b = 180*event.beta/Math.PI;
 			var g = 180*event.gamma/Math.PI;
 			if(!a) a = 0;
-			var theta = a;
+			var theta = event.alpha;
 			S("#magnetometer").html("Magnetometer: " + a.toFixed(3) + ", " + b.toFixed(3) + ", " + g.toFixed(3) + ", " + theta);
 			this.angle(theta);
 		}
