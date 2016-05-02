@@ -73,23 +73,19 @@
 		]));
 		*/
 		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data'),[
-			{x:this.x,y:this.y-1,z:this.z,t:0},
-			{x:this.x,y:this.y-1,z:this.z,t:5}
+			{x:this.x-5,y:this.y-1,z:this.z,t:0},
+			{x:this.x-5,y:this.y-1,z:this.z,t:5}
 		]));
-//		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data2'),[
-//			{x:this.x,y:this.y-1,z:this.z,t:0},
-//			{x:this.x,y:this.y-1,z:this.z,t:5}
-//		]));
 
-		var listener = this.audioCtx.listener;
-		listener.dopplerFactor = 1;
-		listener.speedOfSound = 343.3;
-		listener.setOrientation(0,-1,0,0,0,1);
+		this.listener = this.audioCtx.listener;
+		this.listener.dopplerFactor = 1;
+		this.listener.speedOfSound = 343.3;
+		this.listener.setOrientation(0,0,-1,0,1,0);
 		// Note that the above three features have been deprecated
 		// in recent versions of the spec (mid April 2015 onwards)
 
 		// listener will always be in the same place for this demo
-		listener.setPosition(this.x,this.y,this.z);
+		this.listener.setPosition(this.x,this.y,this.z);
 		S('.listener-data').html('Listener data: X ' + this.x + ' Y ' + this.y + ' Z ' + this.z);
 
 		this.playing = false;
@@ -101,6 +97,9 @@
 
 		return this;
 	}
+	ThreeDSound.prototype.angle = function(theta){
+		if(this.listener) this.listener.setOrientation(Math.cos(theta*Math.PI/180),0,Math.sin(theta*Math.PI/180),0,-1,0);
+	}
 	ThreeDSound.prototype.orientation = function(event){
 		console.log('orientation',event);
 		// BLAH
@@ -109,12 +108,9 @@
 			var b = Math.PI*event.beta/180;
 			var g = Math.PI*event.beta/180;
 			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
-			var phi = 0;
 
-			listener.setOrientation(Math.cos(theta),Math.sin(theta),Math.sin(phi),0,0,1);
-			S("#magnetometer").html("Magnetometer: " + event.alpha + ", " + event.beta + ", " + event.gamma + ", " + theta*180/Math.PI);
-//			if(!this.theta_i) this.theta_i = this.theta;
-//			if(!this.phi_i) this.phi_i = phi.theta;
+			this.angle(theta);
+//			S("#magnetometer").html("Magnetometer: " + event.alpha + ", " + event.beta + ", " + event.gamma + ", " + theta*180/Math.PI);
 		}
 		return this;
 	}
