@@ -102,14 +102,13 @@
 		// BLAH
 		if(!event.alpha) event.alpha = 0;
 		if(this.playing){
-			var a = Math.PI*event.alpha/180;
-			var b = Math.PI*event.beta/180;
-			var g = Math.PI*event.beta/180;
+			var a = 180*event.alpha/Math.PI;
+			var b = 180*event.beta/Math.PI;
+			var g = 180*event.gamma/Math.PI;
 			if(!a) a = 0;
-		console.log(a,b,g)
-			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
+			var theta = a;
 			S("#magnetometer").html("Magnetometer: " + a.toFixed(3) + ", " + b.toFixed(3) + ", " + g.toFixed(3) + ", " + theta*180/Math.PI);
-			this.angle(theta*180/Math.PI);
+			this.angle(theta);
 		}
 		return this;
 	}
