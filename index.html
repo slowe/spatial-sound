@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<title>Spatial Sound</title>
+	<script type="text/javascript" src="stuquery.js"></script>
+	<script type="text/javascript">
+	var space;
+	
+	// shim layer with setTimeout fallback
+	window.requestAnimFrame = (function(){
+		return  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function( callback ){ window.setTimeout(callback, 1000 / 60); };
+	})();
+
+	S(document).ready(function(){
+
+		function motion(event){
+			console.log('motion',event)
+			S("#accelerometer").html("Accelerometer: "
+				+ (event.accelerationIncludingGravity.x/9.81).toFixed(4) + ", "
+				+ (event.accelerationIncludingGravity.y/9.81).toFixed(4) + ", "
+				+ (event.accelerationIncludingGravity.z/9.81).toFixed(4));
+		}
+
+		function orientation(event){
+			console.log('orientation',event);
+			// BLAH
+			S("#magnetometer").html("Magnetometer: "
+				+ event.alpha + ", "
+				+ event.beta + ", "
+				+ event.gamma);
+		}
+
+		if(window.DeviceMotionEvent){
+			window.addEventListener("devicemotion", motion, false);
+			S('#status').html(S('#status').html().replace("is not supported", "is supported"));
+		}
+		if(window.DeviceOrientationEvent){
+			window.addEventListener("deviceorientation", orientation, false);
+			S('#status').html(S('#status').html().replace("is not supported", "is supported"));
+		}
+		space = new ThreeDSound();
+	});
+
+	function ThreeDSound(){
+
+		this.path = [
+			{x:640,y:198,z:290,t:0},
+			{x:640,y:198,z:299,t:5},
+			{x:620,y:198,z:299,t:10},
+			{x:650,y:198,z:297,t:15},
+			{x:640,y:198,z:297,t:20}
+		];
+
+		// First we define a new audio context, panner, listener, and source:
+		var AudioContext = window.AudioContext || window.webkitAudioContext;
+		this.audioCtx = new AudioContext();
+
+		// set up listener and panner position information
+		this.x = window.innerWidth/2;
+		this.y = window.innerHeight/2;
+		this.z = 300;
+		this.xvel = 0;
+		this.yvel = 0;
+		this.zvel = 0;
+
+		this.sounds = new Array();
+		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data'),[
+			{x:this.x,y:this.y-1,z:this.z-10,t:0},
+			{x:this.x,y:this.y-1,z:this.z-1,t:5},
+			{x:this.x-20,y:this.y-1,z:this.z-1,t:10},
+			{x:this.x+10,y:this.y-1,z:this.z-3,t:15},
+			{x:this.x,y:this.y-1,z:this.z-1,t:20}
+		]));
+		this.sounds.push(new SoundSource('seldomsirius.ogg',this.audioCtx,S('.panner-data2'),[
+			{x:this.x-20,y:this.y-1,z:this.z-10,t:0},
+			{x:this.x+20,y:this.y-1,z:this.z-20,t:10}
+		]));
+
+
+		var listener = this.audioCtx.listener;
+		listener.dopplerFactor = 1;
+		listener.speedOfSound = 343.3;
+		listener.setOrientation(0,0,-1,0,1,0);
+		// Note that the above three features have been deprecated
+		// in recent versions of the spec (mid April 2015 onwards)
+
+		// listener will always be in the same place for this demo
+		listener.setPosition(this.x,this.y,this.z);
+		S('.listener-data').html('Listener data: X ' + this.x + ' Y ' + this.y + ' Z ' + this.z);
+
+		this.playing = false;
+		this.start;
+
+		// Wire up buttons to stop and play audio
+		S('.play').on('click',{me:this},function(e){ e.data.me.play(); });
+		S('.stop').on('click',{me:this},function(e){ e.data.me.stop(); });
+
+		return this;
+	}
+	ThreeDSound.prototype.play = function(){
+		var _obj = this;
+
+		function frame(){
+			var now = new Date();
+			// Set the current time in seconds
+			_obj.setTime((now - _obj.start)/1000);
+			if(_obj.playing) requestAnimFrame(frame);
+		}
+
+		this.playing = true;
+		this.start = new Date();
+		this.i = 0;
+		frame();
+		this.getData();
+		for(var i = 0; i < this.sources.length; i++) this.sources[i].start(0);
+		S('.play').attr('disabled', 'disabled');
+		return this;
+	}
+	ThreeDSound.prototype.stop = function(){
+		if(this.playing){
+			for(var i = 0; i < this.sources.length; i++) this.sources[i].stop(0);
+		}
+		this.playing = false;
+		S('.play').attr('disabled', '');
+		return this;
+	}
+	// Use XHR to load an audio track, and
+	// decodeAudioData to decode it and stick it in a buffer.
+	// Then we put the buffer into the source
+	ThreeDSound.prototype.getData = function(){
+		this.sources = new Array();
+		this.requests = new Array();
+		this.audioData = new Array();
+		var _obj = this;
+		var loaded = 0;
+		// Wait until each audio file has been loaded then processes them all
+		function load(){
+			loaded++;
+			if(loaded == _obj.requests.length){
+				for(var i = 0; i < _obj.requests.length; i++){
+					_obj.audioData.push(_obj.requests[i].response);
+					process(i);
+				}
+			}
+		}
+		// Process a particular audio file
+		function process(i){
+			var source = _obj.sources[i];
+			var sound = _obj.sounds[i];
+			_obj.audioCtx.decodeAudioData(_obj.audioData[i], function(buffer) {
+				myBuffer = buffer;
+				source.buffer = myBuffer;
+				source.connect(sound.panner);
+				sound.panner.connect(_obj.audioCtx.destination);
+				source.loop = false;	// Loop the audio
+			}, function(e){"Error with decoding audio data" + e.err});
+		
+		}
+		for(var i = 0; i < this.sounds.length; i++){
+			this.sources.push(this.audioCtx.createBufferSource());
+			this.requests.push(new XMLHttpRequest());
+			this.requests[i].open('GET', this.sounds[i].src, true);
+			this.requests[i].responseType = 'arraybuffer';
+			this.requests[i].onload = function(){ load(); }
+			this.requests[i].send();
+		}
+		return this;
+	}
+	ThreeDSound.prototype.setTime = function(t){
+		for(var i = 0; i < this.sounds.length; i++) this.sounds[i].setTime(t);
+	}
+
+	function SoundSource(src,ctx,el,path){
+		this.src = src;
+		this.ctx = ctx;
+		var audioCtx = ctx;
+		this.el = el;
+		this.path = [
+			{x:640,y:198,z:290,t:0},
+			{x:640,y:198,z:299,t:5},
+			{x:620,y:198,z:299,t:10},
+			{x:650,y:198,z:297,t:15},
+			{x:640,y:198,z:297,t:20}
+		];
+		if(path) this.path = path;
+
+		this.panner = this.ctx.createPanner();
+		this.panner.panningModel = 'HRTF';
+		this.panner.distanceModel = 'inverse';
+		this.panner.refDistance = 1;
+		this.panner.maxDistance = 10000;
+		this.panner.rolloffFactor = 1;
+		this.panner.coneInnerAngle = 360;
+		this.panner.coneOuterAngle = 0;
+		this.panner.coneOuterGain = 0;
+		this.panner.setOrientation(1,0,0);
+		this.panner.setVelocity(0,0,0);
+		this.x;
+		this.y;
+		this.z;
+		this.i = 0;
+
+		return this;
+	}
+	SoundSource.prototype.setTime = function(t){
+		var p = this.path;
+		if(this.i < p.length-1){
+			var d = ( t - p[this.i].t ) / ( p[this.i+1].t - p[this.i].t );
+			if(d < 1){
+				this.setPosition(d,p[this.i],p[this.i+1]);
+			}else{
+				this.setPosition(d,p[this.i+1]);
+				if(this.i < this.path.length-1){
+					this.i++;
+				}
+			}
+		}
+		return this;
+	}
+	SoundSource.prototype.setPosition = function(f,a,b){
+		// Set the velocities
+		if(b){
+			this.velocity( (b.x - a.x)/(b.t - a.t) , (b.y - a.y)/(b.t - a.t) , (b.z - a.z)/(b.t - a.t) );
+		}else{
+			this.velocity(0,0,0);
+			b = a;
+		}
+
+		//console.log(this.xvel,this.yvel,this.zvel);
+		this.position(a.x + f*(b.x - a.x), a.y + f*(b.y - a.y), a.z + f*(b.z - a.z));
+		return this;
+	}
+	SoundSource.prototype.position = function(x,y,z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.panner.setPosition(x,y,z);
+		if(this.el) this.el.html('Panner data: X ' + this.x + ' Y ' + this.y + ' Z ' + this.z);
+		return this;
+	}
+	SoundSource.prototype.velocity = function(x,y,z){
+		this.xvel = x;
+		this.yvel = y;
+		this.zvel = z;
+		this.panner.setVelocity(x,y,z);
+		return this;
+	}
+
+	</script>
+	<style>
+	body { background-color: white; }
+	</style>
+</head>
+<body class="front">
+
+	<div class="padded">
+		<h1>Spatial Sound</h1>
+		<div id="status"><a href="http://www.w3.org/TR/orientation-event/">http://www.w3.org/TR/orientation-event/</a> is not supported.</div>
+		<div id="magnetometer">Mag</div>
+		<div id="accelerometer">Acc</div>
+
+		<button class="play">Play</button>
+		<button class="stop">Stop</button>
+
+		<p class="listener-data">Listener data:</p>
+		<p class="panner-data">Panner data:</p>
+		<p class="panner-data2">Panner data:</p>
+
+
+	</div>
+
+
+</body>
+</html>
