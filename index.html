@@ -6,15 +6,17 @@
 	<title>Spatial Sound</title>
 	<script type="text/javascript" src="stuquery.js"></script>
 	<script type="text/javascript">
-	var space;
-	
 	// shim layer with setTimeout fallback
 	window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function( callback ){ window.setTimeout(callback, 1000 / 60); };
 	})();
 
+	var space;
 	S(document).ready(function(){
 
+		function orientation(event){
+			space.orientation(event);
+		}
 		function motion(event){
 			console.log('motion',event)
 			S("#accelerometer").html("Accelerometer: "
@@ -29,7 +31,7 @@
 			S('#status').html(S('#status').html().replace("is not supported", "is supported"));
 		}
 		if(window.DeviceOrientationEvent){
-			window.addEventListener("deviceorientation", space.orientation, false);
+			window.addEventListener("deviceorientation", orientation, false);
 			S('#status').html(S('#status').html().replace("is not supported", "is supported"));
 		}
 		space = new ThreeDSound();
@@ -98,7 +100,7 @@
 			var a = Math.PI*event.alpha/180;
 			var b = Math.PI*event.beta/180;
 			var g = Math.PI*event.beta/180;
-			theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
+			var theta = Math.atan2((-Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g)),(-Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g)))
 			
 			S("#magnetometer").html("Magnetometer: " + event.alpha + ", " + event.beta + ", " + event.gamma + ", " + theta*180/Math.PI);
 //			if(!this.theta_i) this.theta_i = this.theta;
