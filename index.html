@@ -98,7 +98,6 @@
 		if(this.listener) this.listener.setOrientation(Math.cos(theta*Math.PI/180),0,Math.sin(theta*Math.PI/180),0,-1,0);
 	}
 	ThreeDSound.prototype.orientation = function(event){
-		//console.log('orientation',event);
 		// BLAH
 		if(!event.alpha) event.alpha = 0;
 		if(this.playing){
@@ -107,7 +106,7 @@
 			var g = 180*event.gamma/Math.PI;
 			if(!a) a = 0;
 			var theta = a;
-			S("#magnetometer").html("Magnetometer: " + a.toFixed(3) + ", " + b.toFixed(3) + ", " + g.toFixed(3) + ", " + theta*180/Math.PI);
+			S("#magnetometer").html("Magnetometer: " + a.toFixed(3) + ", " + b.toFixed(3) + ", " + g.toFixed(3) + ", " + theta);
 			this.angle(theta);
 		}
 		return this;
